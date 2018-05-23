@@ -15,7 +15,3 @@ class Board
     spaces.product([' ']).to_h
   end
 end
-
-# board = Board.new
-# p board.blank_board
-['A1', 'A2']

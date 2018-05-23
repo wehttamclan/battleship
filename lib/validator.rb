@@ -13,7 +13,7 @@ class Validator
 
   def is_valid?
     if on_board?
-      return patrol_boat_validator if @length == 2
+      return boat_validator if @length == 2
       return destroyer_validator   if @length == 3
     else
       false
@@ -21,7 +21,7 @@ class Validator
   end
 
   def type
-    return :Patrol_Boat if @length == 2
+    return :Boat if @length == 2
     return :Destroyer   if @length == 3
   end
 
@@ -35,7 +35,7 @@ class Validator
     spaces.include?(head) && spaces.include?(tail)
   end
 
-  def patrol_boat_validator
+  def boat_validator
     if orientation == :Horizontal
       [['1','2'], ['2','3'], ['3','4']].include?([head[1], tail[1]].sort)
     elsif orientation == :Vertical

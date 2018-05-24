@@ -27,7 +27,7 @@ class ShipTest < Minitest::Test
   end
 
   def test_ship_knows_what_type_it_is
-    assert_equal "Destroyer", @destroyer.type
-    assert_equal "Boat", @boat.type
+    assert_equal 'Destroyer', @destroyer.type
+    assert_equal 'Boat', @boat.type
   end
 end

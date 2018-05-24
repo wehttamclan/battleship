@@ -19,7 +19,7 @@ class Ship
   end
 
   def type
-    return "Boat" if @length == 2
-    return "Destroyer" if @length == 3
+    return 'Boat' if @length == 2
+    return 'Destroyer' if @length == 3
   end
 end

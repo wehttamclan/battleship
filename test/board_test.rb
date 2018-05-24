@@ -12,10 +12,10 @@ class BoardTest < Minitest::Test
 
   def test_it_can_make_all_16_spaces_from_rows_and_cols
     board = Board.new
-    spaces = ["A1", "A2", "A3", "A4",
-              "B1", "B2", "B3", "B4",
-              "C1", "C2", "C3", "C4",
-              "D1", "D2", "D3", "D4"]
+    spaces = ['A1', 'A2', 'A3', 'A4',
+              'B1', 'B2', 'B3', 'B4',
+              'C1', 'C2', 'C3', 'C4',
+              'D1', 'D2', 'D3', 'D4']
     assert_equal spaces, board.spaces
   end
 

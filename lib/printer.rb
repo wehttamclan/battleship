@@ -28,7 +28,7 @@ class Printer
   end
 
   def bye
-    puts "OK, bye!"
+    puts 'OK, bye!'
   end
 
   def enter_shot
@@ -40,7 +40,7 @@ class Printer
   end
 
   def off_the_board
-    puts "Please select a valid space on the board."
+    puts 'Please select a valid space on the board.'
   end
 
   def hit

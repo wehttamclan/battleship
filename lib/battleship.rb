@@ -5,7 +5,7 @@ require './lib/printer'
 
 class Battleship
   attr_reader :board, :comp_boat, :comp_destroyer, :player_boat,
-              :player_destroyer, :comp_board, :player_board
+              :player_destroyer, :comp_board#, :player_board
 
   def initialize
     @printer = Printer.new
@@ -15,7 +15,7 @@ class Battleship
     @player_boat = Ship.new(2)
     @player_destroyer = Ship.new(3)
     @comp_board = board.blank_board
-    @player_board = generate_player_board
+    # @player_board = player_board
   end
 
   def validator(head, tail, length)
@@ -31,12 +31,12 @@ class Battleship
 
   def main_menu
     puts 'Would you like to (p)lay, read the (i)nstructions, or (q)uit?'\
-         '>'
     selection = gets.chomp.strip
     if    selection == 'p' || selection == 'play'
       play
     elsif selection == 'i' || selection == 'instructions'
-      puts 'instructions'
+      puts "instructions\n"
+      main_menu
     elsif selection == 'q' || selection == 'quit'
       puts "OK, bye!"
       return false
@@ -52,37 +52,45 @@ class Battleship
   def play
     comp_boat_location = generate_computer_ship_locations[:boat]
     comp_destroyer_location = generate_computer_ship_locations[:destroyer]
-    # player_board = generate_player_board
     print_board(comp_board)
+    player_board = generate_player_board
     until a_sunk_fleet
-
-      puts "Enter your shot coordinates. \n>"
+      puts "\nEnter your shot coordinates. \n>"
       shot = gets.chomp.strip.upcase
-      if comp_board.keys.include?(shot)
-        if comp_boat_location.include?(shot)
-          comp_boat.hit
-          comp_board[shot] = 'X'
-          puts 'Hit!'
-        elsif comp_destroyer_location.include?(shot)
-          comp_destroyer.hit
-          comp_board[shot] = 'X'
-          puts 'Hit!'
+
+      until ['B','D',' '].include?(comp_board[shot])
+        if comp_board.keys.include?(shot)
+          puts "\nYou've already shot at this location. Please shoot again."
+          shot = gets.chomp.strip.upcase
         else
-          comp_board[shot] = 'O'
-          puts 'Miss!'
+          puts "Please select a valid space on the board."
+          shot = gets.chomp.strip.upcase
         end
-        print_board(comp_board)
-      else
-        puts 'You missed the whole board!'
       end
 
-      # check for previous comp shot placement
+      if comp_boat_location.include?(shot)
+        comp_boat.hit
+        comp_board[shot] = 'X'
+        puts "\nHit!"
+      elsif comp_destroyer_location.include?(shot)
+        comp_destroyer.hit
+        comp_board[shot] = 'X'
+        puts "\nHit!"
+      else
+        comp_board[shot] = 'O'
+        puts "\nYou missed!"
+      end
+      print_board(comp_board)
+
       comp_shot = board.spaces.sample
-      if player_board[comp_shot] = 'B'
+      while ['X','O'].include?(player_board[comp_shot])
+        comp_shot = board.spaces.sample
+      end
+      if player_board[comp_shot] == 'B'
         player_boat.hit
         player_board[comp_shot] = 'X'
         puts "You've been hit!"
-      elsif player_board[comp_shot] = 'D'
+      elsif player_board[comp_shot] == 'D'
         player_destroyer.hit
         player_board[comp_shot] = 'X'
         puts "You've been hit!"
@@ -93,9 +101,6 @@ class Battleship
       print_board(player_board)
     end
   end
-
-
-
 
   def generate_computer_ship_locations
     boat_location = computer_place_boat
@@ -109,19 +114,6 @@ class Battleship
     }
   end
 
-  # ['A1','A2'], ['B1','B2','B3']
-  def generate_player_board
-    boat_location = place_boat
-    destroyer_location = place_destroyer
-    while boat_location.any? { |space| destroyer_location.include?(space) }
-      destroyer_location = place_destroyer
-    end
-    player_board = board.blank_board
-    boat_location.map { |space| player_board[space] = 'B' }
-    destroyer_location.map { |space| player_board[space] = 'D' }
-    return player_board
-  end
-
   def print_board(map)
     puts "\n===========\n"\
     ". 1 2 3 4 |\n"\
@@ -129,7 +121,7 @@ class Battleship
     "B #{map["B1"]} #{map["B2"]} #{map["B3"]} #{map["B4"]} |\n"\
     "C #{map["C1"]} #{map["C2"]} #{map["C3"]} #{map["C4"]} |\n"\
     "D #{map["D1"]} #{map["D2"]} #{map["D3"]} #{map["D4"]} |\n"\
-    "===========\n"
+    "===========\n\n"
     map
   end
 
@@ -155,20 +147,33 @@ class Battleship
     end
   end
 
+  def generate_player_board
+    boat_location = place_boat
+    destroyer_location = place_destroyer
+    while boat_location.any? { |space| destroyer_location.include?(space) }
+      destroyer_location = place_destroyer
+    end
+    player_board = board.blank_board
+    boat_location.map { |space| player_board[space] = 'B' }
+    destroyer_location.map { |space| player_board[space] = 'D' }
+    return player_board
+  end
+
   def place_boat
     @printer.place_boat
-    positions = gets.chomp.upcase
+    positions = gets.chomp.strip
     head, tail = positions.split[0], positions.split[1]
     if validator(head, tail, 2).is_valid?
       return [head, tail]
     else
       p "That's invalid."
+      place_boat
     end
   end
 
   def place_destroyer
     @printer.place_destroyer
-    positions = gets.chomp.upcase
+    positions = gets.chomp.strip
     head, tail = positions.split[0], positions.split[1]
     if validator(head, tail, 3).is_valid?
       orientation = validator(head, tail, 3).orientation
@@ -178,7 +183,6 @@ class Battleship
         elsif ['2', '4'] == [head[1], tail[1]].sort
           return ['2','3','4'].map { |col| head[0] += col }
         end
-        require 'pry'; binding.pry
       elsif orientation == :Vertical
         if ['A', 'C'] == [head[0], tail[0]].sort
           return ['A','B','C'].map { |row| row += head[1] }
@@ -187,18 +191,11 @@ class Battleship
         end
       end
     else
-      puts "That is invalid."
+      puts "That is invalid!"
+      place_destroyer
     end
   end
-
 end
 
-
-
-
-
-
-
-
 b = Battleship.new
-b.play
+b.start_game

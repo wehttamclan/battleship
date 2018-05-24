@@ -3,7 +3,7 @@ require './lib/board'
 class Validator
   attr_reader :head, :tail
 
-  def initialize(head, tail, length)
+  def initialize(head, tail=nil, length=nil)
     @head = head.upcase
     @tail = tail.upcase
     @orientation = orientation
@@ -50,5 +50,4 @@ class Validator
       [['A','C'], ['B','D']].include?([head[0], tail[0]].sort)
     end
   end
-
 end

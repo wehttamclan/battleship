@@ -5,7 +5,7 @@ require './lib/printer'
 
 class Battleship
   attr_reader :board, :comp_boat, :comp_destroyer, :player_boat,
-              :player_destroyer, :comp_board#, :player_board
+              :player_destroyer, :comp_board
 
   def initialize
     @printer = Printer.new
@@ -15,7 +15,6 @@ class Battleship
     @player_boat = Ship.new(2)
     @player_destroyer = Ship.new(3)
     @comp_board = board.blank_board
-    # @player_board = player_board
   end
 
   def validator(head, tail, length)
@@ -23,22 +22,22 @@ class Battleship
   end
 
   def start_game
-    puts 'Welcome to BATTLESHIP'
+    @printer.welcome
     while main_menu
       main_menu
     end
   end
 
   def main_menu
-    puts 'Would you like to (p)lay, read the (i)nstructions, or (q)uit?'\
+    @printer.select
     selection = gets.chomp.strip
     if    selection == 'p' || selection == 'play'
       play
     elsif selection == 'i' || selection == 'instructions'
-      puts "instructions\n"
+      @printer.instructions
       main_menu
     elsif selection == 'q' || selection == 'quit'
-      puts "OK, bye!"
+      @printer.bye
       return false
     end
   end
@@ -55,33 +54,31 @@ class Battleship
     print_board(comp_board)
     player_board = generate_player_board
     until a_sunk_fleet
-      puts "\nEnter your shot coordinates. \n>"
+      @printer.enter_shot
       shot = gets.chomp.strip.upcase
-
-      until ['B','D',' '].include?(comp_board[shot])
+      possible_shots = comp_boat_location + comp_destroyer_location + [' ']
+      until possible_shots.include?(comp_board[shot])
         if comp_board.keys.include?(shot)
-          puts "\nYou've already shot at this location. Please shoot again."
+          @printer.duplicate_shot
           shot = gets.chomp.strip.upcase
         else
-          puts "Please select a valid space on the board."
+          @printer.off_the_board
           shot = gets.chomp.strip.upcase
         end
       end
-
       if comp_boat_location.include?(shot)
         comp_boat.hit
         comp_board[shot] = 'X'
-        puts "\nHit!"
+        @printer.hit
       elsif comp_destroyer_location.include?(shot)
         comp_destroyer.hit
         comp_board[shot] = 'X'
-        puts "\nHit!"
+        @printer.hit
       else
         comp_board[shot] = 'O'
-        puts "\nYou missed!"
+        @printer.miss
       end
       print_board(comp_board)
-
       comp_shot = board.spaces.sample
       while ['X','O'].include?(player_board[comp_shot])
         comp_shot = board.spaces.sample
@@ -89,14 +86,14 @@ class Battleship
       if player_board[comp_shot] == 'B'
         player_boat.hit
         player_board[comp_shot] = 'X'
-        puts "You've been hit!"
+        @printer.get_hit
       elsif player_board[comp_shot] == 'D'
         player_destroyer.hit
         player_board[comp_shot] = 'X'
-        puts "You've been hit!"
+        @printer.get_hit
       else
         player_board[comp_shot] = 'O'
-        puts "You've been shot at, but your enemy has missed!"
+        @printer.enemy_miss
       end
       print_board(player_board)
     end
@@ -166,7 +163,7 @@ class Battleship
     if validator(head, tail, 2).is_valid?
       return [head, tail]
     else
-      p "That's invalid."
+      @printer.invalid
       place_boat
     end
   end
@@ -191,11 +188,8 @@ class Battleship
         end
       end
     else
-      puts "That is invalid!"
+      @printer.invalid
       place_destroyer
     end
   end
 end
-
-b = Battleship.new
-b.start_game
